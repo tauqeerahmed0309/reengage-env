@@ -1,3 +1,12 @@
+
+---
+title: ReEngageEnv
+emoji: 🚀
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
 ReEngageEnv
 OpenEnv-compliant RL environment for user re-engagement optimization.
 Train and evaluate agents that learn when and how to contact dormant or churned users across email, push, SMS, and discount channels — while respecting notification fatigue and maximizing revenue-aligned re-engagement.
