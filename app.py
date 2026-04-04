@@ -3,35 +3,29 @@ import requests
 
 ENV_URL = "http://localhost:7860"
 
-obs = None
-
 def reset_env():
-    global obs
-    res = requests.post(f"{ENV_URL}/reset").json()
-    obs = res
-    return res
+    return requests.post(f"{ENV_URL}/reset").json()
 
 def step_env(action):
-    global obs
-    res = requests.post(f"{ENV_URL}/step", json={"action": action}).json()
-    obs = res["observation"]
-    return res
+    return requests.post(f"{ENV_URL}/step", json={"action": action}).json()
 
 with gr.Blocks() as demo:
     gr.Markdown("# 🚀 ReEngageEnv Interactive Demo")
 
     reset_btn = gr.Button("Reset Environment")
-    action = gr.Dropdown(
+
+    action = gr.Radio(
         choices=[
-            ("email", 0),
-            ("push", 1),
-            ("sms", 2),
-            ("discount", 3),
-            ("feature_tip", 4),
-            ("wait", 5),
+            ("Email", 0),
+            ("Push", 1),
+            ("SMS", 2),
+            ("Discount", 3),
+            ("Feature Tip", 4),
+            ("Wait", 5),
         ],
-        label="Select Action"
+        label="Choose Action"
     )
+
     step_btn = gr.Button("Take Step")
 
     output = gr.JSON()

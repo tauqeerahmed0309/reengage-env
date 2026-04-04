@@ -35,4 +35,4 @@ ENV PORT=7860
 ENV ENV_SEED=42
 ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "server.py"]
+CMD ["python", "app.py"]
