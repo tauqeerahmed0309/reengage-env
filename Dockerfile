@@ -36,3 +36,4 @@ ENV ENV_SEED=42
 ENV PYTHONUNBUFFERED=1
 
 CMD ["python", "app.py"]
+COPY app.py ./app.py
