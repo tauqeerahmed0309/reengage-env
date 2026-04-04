@@ -114,3 +114,16 @@ def openenv_yaml():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "7860"))
     uvicorn.run("server:app", host="0.0.0.0", port=port, reload=False)
+from fastapi.responses import HTMLResponse
+
+@app.get("/", response_class=HTMLResponse)
+def home():
+    return """
+    <h1>🚀 ReEngageEnv API is running</h1>
+    <p>Try these endpoints:</p>
+    <ul>
+        <li>/health</li>
+        <li>/reset</li>
+        <li>/step</li>
+    </ul>
+    """
