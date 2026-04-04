@@ -1,0 +1,191 @@
+name: ReEngageEnv
+version: "1.0.0"
+description: >
+  Re-engagement RL environment for training agents to recover dormant and churned
+  users via optimal multi-channel notification strategies. Models the full lifecycle
+  of user re-engagement including behavioral signals, value segmentation, fatigue
+  dynamics, and channel preference matching.
+
+author: ReEngageEnv Contributors
+tags:
+  - openenv
+  - re-engagement
+  - notifications
+  - marketing
+  - user-retention
+  - real-world
+
+# --- Action Space ---
+action_space:
+  type: Discrete
+  n: 6
+  labels:
+    0: email
+    1: push
+    2: sms
+    3: discount
+    4: feature_tip
+    5: wait
+  description: >
+    Six outreach actions. email/push/sms send via respective channel.
+    discount sends a promotional offer. feature_tip highlights a product feature.
+    wait skips this step, allowing fatigue to decay.
+
+# --- Observation Space ---
+observation_space:
+  type: Dict
+  fields:
+    # Behavior
+    days_since_active:
+      type: int
+      range: [0, 365]
+      description: Days elapsed since the user's last session
+    session_freq_7d:
+      type: int
+      range: [0, 7]
+      description: Number of sessions in the last 7 days
+    session_freq_30d:
+      type: int
+      range: [0, 30]
+      description: Number of sessions in the last 30 days
+    avg_session_dur:
+      type: float
+      range: [0.0, 120.0]
+      unit: minutes
+      description: Average session duration in minutes
+    features_used:
+      type: int
+      range: [0, 10]
+      description: Count of distinct product features the user has interacted with
+    drop_off_point:
+      type: categorical
+      values: [onboarding, dashboard, checkout, settings, other]
+      description: Last UI stage where the user dropped off
+    # Value
+    total_spend:
+      type: float
+      range: [0.0, 10000.0]
+      unit: USD
+      description: Cumulative lifetime spend in USD
+    avg_order_value:
+      type: float
+      range: [0.0, 500.0]
+      unit: USD
+      description: Average transaction value in USD
+    subscription_status:
+      type: categorical
+      values: [free, trial, paid, cancelled]
+      description: Current subscription tier
+    ltv_bucket:
+      type: categorical
+      values: [low, medium, high]
+      description: Lifetime value segment — drives reward multiplier
+    # Engagement context
+    time_of_day:
+      type: int
+      range: [0, 23]
+      description: Current hour in UTC
+    day_of_week:
+      type: int
+      range: [0, 6]
+      description: Day of week (Monday=0, Sunday=6)
+    device_type:
+      type: categorical
+      values: [mobile, desktop, tablet]
+      description: User's primary device type
+    notification_fatigue:
+      type: int
+      range: [0, 10]
+      description: Number of notifications already sent this episode; high values penalize reward
+    channel_pref:
+      type: categorical
+      values: [email, push, sms, none]
+      description: User's known preferred contact channel
+    # Segmentation
+    user_status:
+      type: categorical
+      values: [new, active, dormant, churned]
+      description: High-level activity status
+    behavioral_cluster:
+      type: categorical
+      values: [browser, buyer, lurker, power_user]
+      description: Behavioral archetype derived from historical activity patterns
+    discount_sensitivity:
+      type: categorical
+      values: [yes, no, unknown]
+      description: Whether the user responds positively to discount offers
+    # Action history
+    last_action:
+      type: categorical
+      values: [none, email, push, sms, discount, feature_tip, wait]
+      description: The most recent action taken by the agent this episode
+    num_attempts:
+      type: int
+      range: [0, 50]
+      description: Total outreach attempts made this episode
+    days_since_last_notif:
+      type: int
+      range: [0, 365]
+      description: Days since the most recent notification was sent
+
+# --- Reward ---
+reward:
+  range: [-1.0, 2.0]
+  shaped: true
+  description: >
+    Shaped reward providing partial progress signals throughout the trajectory.
+    Components:
+      re_engagement:   +1.0 × ltv_multiplier (low=1.0, medium=1.5, high=2.0) on re-engagement
+      channel_match:   +0.2 if action channel matches user's channel_pref
+      fatigue_penalty: −0.15 × (fatigue − 3) per step when fatigue ≥ 4
+      discount_penalty:−0.10 if discount sent to low-LTV user
+      wait_bonus:      +0.05 if agent waits when fatigue ≥ 3 (smart pacing)
+      step_cost:       −0.02 per step (encourages efficiency)
+
+# --- Episode ---
+episode:
+  max_steps: 10
+  termination_conditions:
+    - User is re-engaged (days_since_active resets to 0)
+    - max_steps reached
+
+# --- Tasks ---
+tasks:
+  - id: task1
+    name: Re-engage a dormant user
+    difficulty: easy
+    max_steps: 5
+    description: >
+      Re-engage a dormant user (7–14 days inactive) within 5 steps.
+      Grader: 1.0 if re-engaged ≤ 3 steps, 0.5 if ≤ 5 steps, 0.0 otherwise.
+
+  - id: task2
+    name: Win-back a high-value churned user without spamming
+    difficulty: medium
+    max_steps: 8
+    description: >
+      Re-engage a churned high-LTV user within 8 steps while keeping
+      notification_fatigue ≤ 3. Penalizes spam, rewards early re-engagement.
+
+  - id: task3
+    name: Revenue-aligned multi-user campaign
+    difficulty: hard
+    max_steps: 5
+    description: >
+      Batch of 10 users with mixed profiles. Maximize LTV-weighted re-engagement
+      rate under a 5-action-per-user budget. Scored on precision × recall (F1)
+      for high-LTV users.
+
+# --- Infrastructure ---
+runtime:
+  framework: python
+  python_version: ">=3.10"
+  server: uvicorn + FastAPI
+  port: 7860
+
+endpoints:
+  health:  GET  /health
+  reset:   POST /reset
+  step:    POST /step
+  state:   GET  /state
+  metadata:GET  /openenv.yaml
