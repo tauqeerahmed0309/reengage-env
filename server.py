@@ -65,12 +65,19 @@ def health() -> Dict[str, str]:
     return {"status": "ok", "env": "ReEngageEnv", "version": "1.0.0"}
 
 
+from fastapi import Body
+
 @app.post("/reset", response_model=Observation)
-def reset(req: ResetRequest = ResetRequest()) -> Observation:
+def reset(req: ResetRequest = Body(default=None)) -> Observation:
     global _env, _initialized
-    seed = req.seed if req.seed is not None else int(os.environ.get("ENV_SEED", "42"))
+
+    if req is None:
+        seed = int(os.environ.get("ENV_SEED", "42"))
+    else:
+        seed = req.seed if req.seed is not None else int(os.environ.get("ENV_SEED", "42"))
+
     _env = ReEngageEnv(seed=seed)
-    obs  = _env.reset()
+    obs = _env.reset()
     _initialized = True
     return obs
 
