@@ -70,8 +70,12 @@ def run_task(task_id, seed):
         if done:
             break
 
-    score = min(1.0, max(0.0, total_reward / 5.0))
-    print(f"[END] success={str(score>0).lower()} steps={len(rewards)} score={score:.2f} rewards={','.join(rewards)}")
+    # ✅ Fix: ensure score is strictly inside (0,1)
+    raw_score = total_reward / 5.0
+    epsilon = 1e-6
+    score = max(epsilon, min(1 - epsilon, raw_score))
+
+    print(f"[END] success={str(score>0).lower()} steps={len(rewards)} score={score:.6f} rewards={','.join(rewards)}")
     return score
 
 
