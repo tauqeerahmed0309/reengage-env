@@ -24,3 +24,6 @@ include = ["reengage_env*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[project.scripts]
+server = "server:app"
