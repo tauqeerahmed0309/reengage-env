@@ -1,7 +1,13 @@
 """
-Hugging Face Space entrypoint wrapper.
-
-Keeps Dockerfile compatibility by importing the FastAPI app from server.py.
+Hugging Face Space entrypoint for ReEngageEnv.
 """
 
+import os
+import uvicorn
+
 from server import app
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", "7860"))
+    uvicorn.run(app, host="0.0.0.0", port=port)
