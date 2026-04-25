@@ -1,0 +1,22 @@
+{
+  "scenarios": [
+    {
+      "id": "dormant_preferred_push",
+      "title": "Dormant user prefers push",
+      "seed": 42,
+      "expected_behavior": "Use push while fatigue is low, wait when fatigue rises, avoid spam."
+    },
+    {
+      "id": "medium_ltv_feature_tip",
+      "title": "Medium-LTV user with no clear channel preference",
+      "seed": 43,
+      "expected_behavior": "Use conservative feature tips and wait when needed."
+    },
+    {
+      "id": "quick_reengagement",
+      "title": "Fast successful re-engagement",
+      "seed": 46,
+      "expected_behavior": "Re-engage quickly with minimal steps."
+    }
+  ]
+}

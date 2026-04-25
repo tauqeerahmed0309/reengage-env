@@ -1,0 +1,49 @@
+# Training configuration for ReEngageEnv
+
+# -----------------------------
+# ENVIRONMENT
+# -----------------------------
+env:
+  url: "http://localhost:7860"
+  max_steps: 10
+  seeds: [42, 43, 44, 45, 46]
+
+# -----------------------------
+# MODEL
+# -----------------------------
+model:
+  name: "gpt-4o-mini"   # placeholder (can swap later)
+  temperature: 0.7
+
+# -----------------------------
+# ROLLOUT
+# -----------------------------
+rollout:
+  num_episodes: 50
+  max_steps: 10
+  save_trajectories: true
+
+# -----------------------------
+# TRAINING (TRL / GRPO placeholder)
+# -----------------------------
+training:
+  algorithm: "grpo"     # planned
+  batch_size: 8
+  num_epochs: 3
+  learning_rate: 2e-5
+
+# -----------------------------
+# REWARD / VERIFIER
+# -----------------------------
+reward:
+  use_verifier: true
+  fatigue_limit: 3
+  reward_min: -1.0
+  reward_max: 2.5
+
+# -----------------------------
+# LOGGING
+# -----------------------------
+logging:
+  log_dir: "experiments/logs"
+  save_every: 10
